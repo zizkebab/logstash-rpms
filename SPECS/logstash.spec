@@ -17,8 +17,7 @@ Source4:        usr-sbin-logstash
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
-Requires:       jdk
-# Requires:       java
+Requires:       java
 
 Requires:       chkconfig initscripts
 
