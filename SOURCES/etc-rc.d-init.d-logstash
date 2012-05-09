@@ -1,98 +1,82 @@
-#!/bin/bash
-#
-# Startup script for the Numberfour webservice
-#
-# chkconfig: 2345 80 05
-# description: Logstash
-#
-source /etc/rc.d/init.d/functions
+#! /bin/sh
 
-RETVAL=0
-NAME=logstash
-DAEMON=/usr/sbin/logstash
-PIDFILE=/var/run/logstash.pid
-SUBSYS=/var/lock/subsys/logstash
-DAEMON_ARGS="-f /etc/logstash/logstash.conf -l /var/log/logstash.log"
-START_STOP_OPTS="--verbose"
-RUN_AS="root"
+### BEGIN INIT INFO
+# Provides:          logstash-shipper
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
 
-start() {
-    echo "Starting $NAME ($DAEMON): "
-    # Return
-    #   0 if daemon has been started
-    #   1 if daemon was already running
-    #   2 if daemon could not be started
-    if pgrep -f "${DAEMON}"; then
-	return 1
-    fi
-    start-stop-daemon --start ${START_STOP_OPTS} --chuid "${RUN_AS}" --background --make-pidfile --pidfile "${PIDFILE}" --exec "${DAEMON}" -- ${DAEMON_ARGS}
-    RETVAL="$?"
+mode="shipper"
+logstash_bin="/usr/bin/java -jar /usr/local/bin/logstash/logstash.jar"
+logstash_conf="/etc/logstash/logstash.conf"
+logstash_log="/var/log/logstash.log"
+NICE_LEVEL="-n 19"
 
-    [ "${RETVAL}" -eq 0 ] && touch "${SUBSYS}"
-    return "${RETVAL}"
+find_logstash_process () {
+	PIDTEMP=`ps ux | grep logstash | grep java | grep $mode | awk '{ print $2 }'`
+	# Pid not found
+	if [ "x$PIDTEMP" = "x" ]; then
+		PID=-1
+	else
+		PID=$PIDTEMP
+	fi
 }
 
-stop() {
-    echo "Shutting down $NAME ($DAEMON): "
+start () {
+	find_logstash_process
+	if [ $PID -gt 0 ]; then
+		echo "logstash $mode is already running"
+		exit 0
+	fi
 
-    # Return
-    #   0 if daemon has been stopped
-    #   1 if daemon was already stopped
-    #   2 if daemon could not be stopped
-    #   other if a failure occurred
-    start-stop-daemon --stop ${START_STOP_OPTS} --retry=TERM/30/KILL/5 --pidfile "${PIDFILE}"
-    RETVAL="$?"
-    [ "$RETVAL" = 2 ] && return 2
+	LOG_DIR=`dirname ${logstash_log}`
+	if [ ! -d $LOG_DIR ]; then
+		echo "Log dir ${LOG_DIR} doesn't exist. Creating"
+		mkdir -p $LOG_DIR
+	fi
+	nohup nice ${NICE_LEVEL} ${logstash_bin} agent -f "/etc/logstash/logstash.conf" -l ${logstash_log} > ${logstash_log} &
+}
 
-    # Wait for children to finish too if this is a daemon that forks
-    # and if the daemon is only ever run from this initscript.
-    # If the above conditions are not satisfied then add some other code
-    # that waits for the process to drop all resources that could be
-    # needed by services started subsequently.  A last resort is to
-    # sleep for some time.
-    pkill -KILL -f "${DAEMON}"
-    RC="$?"
-    case "${RC}" in
-	0|1)
-	    ;;
+stop () {
+	find_logstash_process
+	if [ $PID -ne -1 ]; then
+		kill $PID
+	fi
+}
+
+case $1 in
+	start)
+		start
+		;;
+	stop)
+		stop
+		exit 0
+		;;
+	reload)
+		stop
+		start
+		;;
+	restart)
+		stop
+		start
+		;;
+	status)
+		find_logstash_process
+		if [ $PID -gt 0 ]; then
+			echo "Logstash $mode is running"
+			exit 0
+		else
+			echo "Logstash $mode is not running"
+			exit 1
+		fi
+		;;
 	*)
-	    return 2
-	    ;;
-    esac
-
-    # Many daemons don't delete their pidfiles when they exit.
-    rm -f "${PIDFILE}" "${SUBSYS}"
-
-    return "${RETVAL}"
-}
-
-restart() {
-    "$0" stop
-    "$0" start
-}
-
-case "$1" in
-    start)
-	start
-	;;
-    stop)
-	stop
-	;;
-    restart)
-	restart
-	;;
-    condrestart)
-	[ -e "${SUBSYS}" ] && restart
-	RETVAL="$?"
-	;;
-    status)
-	status -p "${PIDFILE}" "${NAME}"
-	RETVAL="$?"
-	;;
-    *)
-	echo $"Usage $0 {start|stop|restart|reload|condrestart|status}"
-	RETVAL=1
+		echo $"Usage: $0 {start|stop|restart|reload|status}"
+		RETVAL=1
 esac
 
-exit "${RETVAL}"
-
+exit 0
