@@ -7,10 +7,12 @@ Files to build grok/logstash RPMs for RedHat Enterprise.
 
 Build instructions:
 -------------------
-git clone git://github.com/lboynton/logstash-rpms.git
-echo '%_topdir %(echo $HOME)/logstash-rpms' > ~/.rpmmacros
-cd logstash-rpms
-spectool --get-files SPECS/logstash.spec --directory SOURCES
-mkdir BUILD
-mkdir RPMS
-rpmbuild -bb --buildroot ~/logstash-rpms/BUILD SPECS/logstash.spec
+Run the following commands (note that your ~/.rpmmacros file will be overwritten):
+
+	git clone git://github.com/lboynton/logstash-rpms.git
+	echo '%_topdir %(echo $HOME)/logstash-rpms' > ~/.rpmmacros
+	cd logstash-rpms
+	spectool --get-files SPECS/logstash.spec --directory SOURCES
+	mkdir BUILD
+	mkdir RPMS
+	rpmbuild -bb --buildroot ~/logstash-rpms/BUILD SPECS/logstash.spec
