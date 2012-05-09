@@ -10,14 +10,13 @@
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
-mode="shipper"
 logstash_bin="/usr/bin/java -jar /usr/local/bin/logstash/logstash.jar"
 logstash_conf="/etc/logstash/logstash.conf"
 logstash_log="/var/log/logstash.log"
 NICE_LEVEL="-n 19"
 
 find_logstash_process () {
-	PIDTEMP=`ps ux | grep logstash | grep java | grep $mode | awk '{ print $2 }'`
+	PIDTEMP=`ps ux | grep logstash | grep java | awk '{ print $2 }'`
 	# Pid not found
 	if [ "x$PIDTEMP" = "x" ]; then
 		PID=-1
@@ -29,7 +28,7 @@ find_logstash_process () {
 start () {
 	find_logstash_process
 	if [ $PID -gt 0 ]; then
-		echo "logstash $mode is already running"
+		echo "logstash agent is already running"
 		exit 0
 	fi
 
@@ -67,10 +66,10 @@ case $1 in
 	status)
 		find_logstash_process
 		if [ $PID -gt 0 ]; then
-			echo "Logstash $mode is running"
+			echo "Logstash agent is running"
 			exit 0
 		else
-			echo "Logstash $mode is not running"
+			echo "Logstash agent is not running"
 			exit 1
 		fi
 		;;
