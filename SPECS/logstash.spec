@@ -1,8 +1,8 @@
 %define debug_package %{nil}
 
 Name:           logstash
-Version:        1.0.14
-Release:        6%{?dist}
+Version:        1.1.0
+Release:        1%{?dist}
 Summary:        logstash is a tool for managing events and logs.
 
 Group:          System Environment/Daemons
@@ -18,7 +18,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
 Requires:       jdk
-Requires:       grok
 # Requires:       java
 
 Requires:       chkconfig initscripts
