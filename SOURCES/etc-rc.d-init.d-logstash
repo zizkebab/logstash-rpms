@@ -12,7 +12,7 @@ NAME=logstash
 DAEMON=/usr/sbin/logstash
 PIDFILE=/var/run/logstash.pid
 SUBSYS=/var/lock/subsys/logstash
-DAEMON_ARGS="-f /etc/logstash/logstash.conf"
+DAEMON_ARGS="-f /etc/logstash/logstash.conf -l /var/log/logstash.log"
 START_STOP_OPTS="--verbose"
 RUN_AS="root"
 
