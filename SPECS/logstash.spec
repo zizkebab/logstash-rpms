@@ -42,6 +42,10 @@ install -D -m 644 %SOURCE3 "${RPM_BUILD_ROOT}/etc/logstash/log4j.properties"
 install -D -m 755 %SOURCE4 "${RPM_BUILD_ROOT}/usr/sbin/logstash"
 mkdir -p "${RPM_BUILD_ROOT}/var/lib/logstash"
 
+%post
+/sbin/chkconfig --add logstash
+/sbin/service logstash start
+
 %clean
 rm -rf %{buildroot}
 
