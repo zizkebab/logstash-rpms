@@ -1,14 +1,15 @@
 %define debug_package %{nil}
 
 Name:           logstash
-Version:        1.1.0
+Version:        1.1.13
 Release:        1%{?dist}
 Summary:        logstash is a tool for managing events and logs.
 
 Group:          System Environment/Daemons
 License:        Apache 2.0
 URL:            http://logstash.net
-Source0:        http://semicomplete.com/files/logstash/%{name}-%{version}-monolithic.jar
+# Source0:        http://semicomplete.com/files/logstash/%{name}-%{version}-monolithic.jar
+Source0:	https://logstash.objects.dreamhost.com/release/%{name}-%{version}-flatjar.jar
 Source1:        etc-rc.d-init.d-logstash
 Source2:        etc-logstash-logstash.conf
 Source3:        etc-logstash-log4j.properties
